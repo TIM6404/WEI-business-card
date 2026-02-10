@@ -3,8 +3,13 @@
   <head>
     <title>威志的 AR 數位名片</title>
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    
+    <!-- A-Frame 核心 -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <!-- AR.js 核心 -->
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <!-- 【關鍵修改】引入 aframe-extras 以支援 GLB 模型動作 (Animation Mixer) -->
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>
     
     <style>
       /* UI: 右側懸浮選單 */
@@ -29,11 +34,8 @@
     
     <div id="ui-container">
       <div class="btn" onclick="showImage()">🖼️ 平面名片</div>
-      
       <div class="btn" onclick="window.open('https://youtu.be/dA0uEJms7zM?si=7V0Ljdmd2wS5kTaK&t=1', '_blank')">🎥 影片介紹</div>
-      
       <div class="btn" onclick="window.open('https://github.com/你的帳號', '_blank')">🌐 個人網頁</div>
-      
       <div class="btn" onclick="show3D()">🤖 3D 動態</div>
       <div class="btn" onclick="window.open('https://github.com', '_blank')">🔗 原始碼</div>
     </div>
@@ -42,12 +44,12 @@
       
       <a-assets>
         <img id="asset-card" src="my-card.jpg">
-        
         <a-asset-item id="asset-model" src="robot.glb"></a-asset-item>
       </a-assets>
 
       <a-marker type="pattern" url="pattern-marker.patt">
         
+        <!-- 1. 平面名片 (保持原樣) -->
         <a-plane id="display-plane" 
                  src="#asset-card" 
                  position="0 0 0" rotation="-90 0 0" width="1.5" height="1"
@@ -55,13 +57,24 @@
                  animation__float="property: position; from: 0 0 0; to: 0 0.2 0; dir: alternate; dur: 2000; loop: true">
         </a-plane>
 
-        <a-entity id="display-model" 
-                  gltf-model="#asset-model" 
-                  scale="0.5 0.5 0.5" 
-                  position="0 0 0.5" 
-                  rotation="-90 0 0"
-                  visible="false"
-                  animation="property: rotation; to: -90 360 0; loop: true; dur: 5000; easing: linear">
+        <!-- 2. 3D 模型區塊 -->
+        <!-- 
+           技巧：使用一個父層 entity 來處理旋轉 (rotation="-90 0 0") 讓模型站立。
+           這樣內部的模型只需要處理自己的動畫，不會因為座標軸混亂而亂轉。
+        -->
+        <a-entity rotation="-90 0 0">
+            <!-- 
+                【關鍵修改】：
+                1. animation-mixer: 這是讓 glb 播放內建動作的指令。 loop: repeat 代表無限循環。
+                2. 移除了舊的 animation="property: rotation..."，避免模型像陀螺一樣自轉 (除非那是你想要的)。
+            -->
+            <a-entity id="display-model" 
+                      gltf-model="#asset-model" 
+                      scale="0.5 0.5 0.5" 
+                      position="0 0 0.5" 
+                      animation-mixer="clip: *; loop: repeat; timeScale: 1"
+                      visible="false">
+            </a-entity>
         </a-entity>
 
       </a-marker>
