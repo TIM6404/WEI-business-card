@@ -52,9 +52,9 @@
         <!-- 1. 平面名片 (保持原樣) -->
         <a-plane id="display-plane" 
                  src="#asset-card" 
-                 position="0 0 0" rotation="-90 0 0" width="1.5" height="1"
+                 position="0 0 0" rotation="-75 0 0" width="1.5" height="1"
                  animation__scale="property: scale; to: 1.5 1.5 1.5; dur: 3000; easing: easeOutElastic; loop: false"
-                 animation__float="property: position; from: 0 0 0; to: 0 0.2 0; dir: alternate; dur: 2000; loop: true">
+                 animation__float="property: position; from: 0 0 0; to: 0 0.2 0; dir: alternate; dur: 1000; loop: true">
         </a-plane>
 
         <!-- 2. 3D 模型區塊 -->
@@ -70,7 +70,7 @@
             -->
             <a-entity id="display-model" 
                       gltf-model="#asset-model" 
-                      scale="0.5 0.5 0.5" 
+                      scale="0.16 0.16 0.16" 
                       position="0 0 0.5" 
                       animation-mixer="clip: *; loop: repeat; timeScale: 1"
                       visible="false">
