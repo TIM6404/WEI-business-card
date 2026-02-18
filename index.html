@@ -4,11 +4,8 @@
     <title>威志的 AR 數位名片</title>
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     
-    <!-- A-Frame 核心 -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- AR.js 核心 -->
     <script src="https://raw.githack.com/AR-js-org/AR.js/3.3.2/aframe/build/aframe-ar.js"></script>
-    <!-- 【關鍵修改】引入 aframe-extras 以支援 GLB 模型動作 (Animation Mixer) -->
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>
     
     <style>
@@ -23,8 +20,9 @@
         color: white; border: 1px solid rgba(255,255,255,0.3);
         padding: 12px; border-radius: 20px;
         font-family: 'Microsoft JhengHei', sans-serif; text-align: center;
-        backdrop-filter: blur(5px); /* 毛玻璃特效 */
+        backdrop-filter: blur(5px);
         cursor: pointer; transition: 0.3s;
+        user-select: none; /* 防止點擊時選取文字 */
       }
       .btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.2); }
     </style>
@@ -40,13 +38,16 @@
       <div class="btn" onclick="window.open('https://github.com', '_blank')">🔗 原始碼</div>
     </div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;">
+    <a-scene 
+      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+      renderer="logarithmicDepthBuffer: true;"
+      vr-mode-ui="enabled: false">
       
       <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
       <a-light type="directional" color="#ffffff" intensity="0.8" position="1 2 1"></a-light>
 
       <a-assets>
-        <img id="asset-card" src="my-card.jpg">
+        <img id="card-img" src="my-card.jpg">
         <a-asset-item id="asset-model" src="robot.glb"></a-asset-item>
       </a-assets>
 
@@ -57,25 +58,14 @@
           smoothTolerance="0.01"
           smoothThreshold="5">
                
-        <!-- 1. 平面名片 (保持原樣) -->
         <a-plane id="display-plane" 
-                 src="#asset-card" 
-                 position="0 0 0" rotation="-75 0 0" width="1.5" height="1"
+                 src="#card-img" 
+                 position="0 0 0" rotation="-90 0 0" width="1.5" height="1"
                  animation__scale="property: scale; to: 1.5 1.5 1.5; dur: 3000; easing: easeOutElastic; loop: false"
                  animation__float="property: position; from: 0 0 0; to: 0 0.2 0; dir: alternate; dur: 1000; loop: true">
         </a-plane>
 
-        <!-- 2. 3D 模型區塊 -->
-        <!-- 
-           技巧：使用一個父層 entity 來處理旋轉 (rotation="-90 0 0") 讓模型站立。
-           這樣內部的模型只需要處理自己的動畫，不會因為座標軸混亂而亂轉。
-        -->
         <a-entity rotation="-90 0 0">
-            <!-- 
-                【關鍵修改】：
-                1. animation-mixer: 這是讓 glb 播放內建動作的指令。 loop: repeat 代表無限循環。
-                2. 移除了舊的 animation="property: rotation..."，避免模型像陀螺一樣自轉 (除非那是你想要的)。
-            -->
             <a-entity id="display-model" 
                       gltf-model="#asset-model" 
                       scale="0.16 0.16 0.16" 
