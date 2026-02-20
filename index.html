@@ -22,7 +22,7 @@
         font-family: 'Microsoft JhengHei', sans-serif; text-align: center;
         backdrop-filter: blur(5px);
         cursor: pointer; transition: 0.3s;
-        user-select: none; /* 防止點擊時選取文字 */
+        user-select: none;
       }
       .btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.2); }
     </style>
@@ -61,39 +61,52 @@
         <a-plane id="display-plane" 
          src="#card-img" 
          position="0 0 0" rotation="-90 0 0" width="1.5" height="1"
-         visible="true"
-         animation__scale="property: scale; from: 0 0 0; to: 1.5 1.5 1.5; dur: 1500; easing: easeOutElastic"
-         animation__float="property: position; from: 0 0 0; to: 0 0.2 0; dir: alternate; dur: 1000; loop: true">
-</a-plane>
+         visible="false"
+         animation__scale="property: scale; from: 0 0 0; to: 1.5 1.5 1.5; dur: 1500; easing: easeOutElastic; startEvents: playScale"
+         animation__float="property: position; from: 0 0 0; to: 0 0.2 0; dir: alternate; dur: 1000; loop: true; startEvents: playFloat">
+        </a-plane>
+        
+        <a-entity id="display-model" gltf-model="#asset-model" scale="0.5 0.5 0.5" visible="false"></a-entity>
 
-<script>
-  const plane = document.querySelector('#display-plane');
-  const model = document.querySelector('#display-model');
+      </a-marker>
+    </a-scene>
 
-  // 初始化：確保掃描後第一眼看到的是名片
-  window.onload = () => {
-    showImage(); 
-  };
+    <script>
+      const plane = document.querySelector('#display-plane');
+      const model = document.querySelector('#display-model');
 
-  function resetAll() {
-    plane.setAttribute('visible', false);
-    model.setAttribute('visible', false);
-    // 停止所有動畫以節省效能
-    plane.setAttribute('animation__float', 'enabled: false');
-  }
+      // 初始化：確保掃描後第一眼看到的是名片
+      window.onload = () => {
+        showImage(); 
+      };
 
-  function showImage() {
-    resetAll();
-    plane.setAttribute('visible', true);
-    plane.setAttribute('animation__float', 'enabled: true');
-    // 重新觸發縮放動畫
-    plane.emit('animation__scale'); 
-  }
+      function resetAll() {
+        if(plane) {
+          plane.setAttribute('visible', false);
+          // 移除位置以重置動畫狀態
+          plane.removeAttribute('animation__float');
+        }
+        if(model) {
+          model.setAttribute('visible', false);
+        }
+      }
 
-  function show3D() {
-    resetAll();
-    model.setAttribute('visible', true);
-  }
-</script>
+      function showImage() {
+        resetAll();
+        // 重新設定浮動動畫並設為可見
+        plane.setAttribute('animation__float', 'property: position; from: 0 0 0; to: 0 0.2 0; dir: alternate; dur: 1000; loop: true');
+        plane.setAttribute('visible', true);
+        
+        // 觸發縮放進場效果
+        plane.emit('playScale'); 
+      }
+
+      function show3D() {
+        resetAll();
+        if(model) {
+          model.setAttribute('visible', true);
+        }
+      }
+    </script>
   </body>
 </html>
