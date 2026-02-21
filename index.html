@@ -86,11 +86,7 @@
         if(model) model.setAttribute('visible', false);
         if(plane) {
           plane.setAttribute('visible', true);
-          
-          // 【修正重點 2】：移除手動設定 scale 與 position 的程式碼。
-          // 直接利用 A-Frame 動畫屬性裡的 `from: 0 0 0` 即可，避免與 emit 衝突。
-          
-          // 精準發送訊號觸發 HTML 中寫好的 startEvents
+          // 發送訊號啟動動畫
           plane.emit('playScale');
           plane.emit('playFloat');
         }
@@ -104,10 +100,12 @@
       scene.addEventListener('loaded', () => {
         
         marker.addEventListener('markerFound', () => {
-          showImage(); 
+          // 【修正重點】：掃描到圖卡時不自動顯示，保留空白讓使用者自行點擊按鈕
+          console.log("圖卡偵測成功，等待按鈕觸發...");
         });
 
         marker.addEventListener('markerLost', () => {
+          // 移開鏡頭時，將畫面上的名片或模型隱藏重置
           if(plane) plane.setAttribute('visible', false);
           if(model) model.setAttribute('visible', false);
         });
