@@ -35,7 +35,7 @@
         if(plane) {
           plane.setAttribute('visible', true);
           plane.emit('playScale');
-          plane.emit('playFloat');
+          plane.emit('playFloat'), 100);
         }
       };
 
@@ -44,6 +44,7 @@
         const model = document.querySelector('#display-model');
         if(plane) plane.setAttribute('visible', false);
         if(model) model.setAttribute('visible', true);
+          model.setAttribute('scale', '0.5 0.5 0.5');
       };
 
       // 註冊 marker-handler 元件
