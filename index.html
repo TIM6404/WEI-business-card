@@ -25,15 +25,54 @@
       }
       .btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.2); }
     </style>
+
+    <script>
+      // 定義全域切換函式，供 UI 按鈕與 Marker 事件使用
+      window.showImage = function() {
+        const plane = document.querySelector('#display-plane');
+        const model = document.querySelector('#display-model');
+        if(model) model.setAttribute('visible', false);
+        if(plane) {
+          plane.setAttribute('visible', true);
+          plane.emit('playScale');
+          plane.emit('playFloat');
+        }
+      };
+
+      window.show3D = function() {
+        const plane = document.querySelector('#display-plane');
+        const model = document.querySelector('#display-model');
+        if(plane) plane.setAttribute('visible', false);
+        if(model) model.setAttribute('visible', true);
+      };
+
+      // 註冊 marker-handler 元件
+      AFRAME.registerComponent('marker-handler', {
+        init: function () {
+          // 掃描到標記時：觸發平面名片進場
+          this.el.addEventListener('markerFound', () => {
+            window.showImage(); 
+          });
+
+          // 遺失標記時：隱藏所有物件
+          this.el.addEventListener('markerLost', () => {
+            const plane = document.querySelector('#display-plane');
+            const model = document.querySelector('#display-model');
+            if(plane) plane.setAttribute('visible', false);
+            if(model) model.setAttribute('visible', false);
+          });
+        }
+      });
+    </script>
   </head>
 
   <body style="margin: 0; overflow: hidden;">
     
     <div id="ui-container">
-      <div class="btn" onclick="showImage()">🖼️ 平面名片</div>
+      <div class="btn" onclick="showImage('my-card.jpg', '_blank')">🖼️ 平面名片</div>
       <div class="btn" onclick="window.open('https://youtu.be/dA0uEJms7zM?si=7V0Ljdmd2wS5kTaK&t=1', '_blank')">🎥 影片介紹</div>
       <div class="btn" onclick="window.open('https://tim6404.github.io/design-works/', '_blank')">🌐 個人網頁</div>
-      <div class="btn" onclick="show3D()">🤖 3D 動態</div>
+      <div class="btn" onclick="show3D('robot.glb', '_blank')">🤖 3D 動態</div>
       <div class="btn" onclick="window.open('https://github.com', '_blank')">🔗 原始碼</div>
     </div>
 
@@ -51,8 +90,9 @@
       </a-assets>
 
       <a-marker type="pattern" 
-          url="pattern.patt"
+          url="pattern-qr.ioi.tw.patt"
           emitevents="true"
+          marker-handler
           smooth="true"
           smoothCount="10"
           smoothTolerance="0.01"
@@ -75,45 +115,5 @@
 
       </a-marker>
     </a-scene>
-
-   <script>
-      const plane = document.querySelector('#display-plane');
-      const model = document.querySelector('#display-model');
-      const marker = document.querySelector('a-marker');
-      const scene = document.querySelector('a-scene');
-
-      function showImage() {
-        if(model) model.setAttribute('visible', false);
-        if(plane) {
-          plane.setAttribute('visible', true);
-          
-          // 【修正重點 2】：移除手動設定 scale 與 position 的程式碼。
-          // 直接利用 A-Frame 動畫屬性裡的 `from: 0 0 0` 即可，避免與 emit 衝突。
-          
-          // 精準發送訊號觸發 HTML 中寫好的 startEvents
-          plane.emit('playScale');
-          plane.emit('playFloat');
-        }
-      }
-
-      function show3D() {
-        if(plane) plane.setAttribute('visible', false);
-        if(model) model.setAttribute('visible', true);
-      }
-
-      scene.addEventListener('loaded', () => {
-        
-        marker.addEventListener('markerFound', () => {
-          showImage(); 
-        });
-
-        marker.addEventListener('markerLost', () => {
-          if(plane) plane.setAttribute('visible', false);
-          if(model) model.setAttribute('visible', false);
-        });
-
-      });
-    </script>
   </body>
-
 </html>
