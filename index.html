@@ -1,6 +1,5 @@
 <!DOCTYPE 
-<html>
-  <head>
+<head>
     <meta charset="utf-8" />
     <title>AR 數位名片</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -8,8 +7,8 @@
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
 
     <style>
-      /* UI 按鈕樣式設定 */
-      .buttons {
+      /* UI 容器與按鈕樣式設定 */
+      #ui-container {
         position: absolute;
         bottom: 20px;
         left: 0;
@@ -17,56 +16,59 @@
         display: flex;
         justify-content: center;
         z-index: 10;
-        pointer-events: none;
+        pointer-events: none; /* 讓容器本身不阻擋 AR 點擊 */
       }
-      button {
-        padding: 10px 20px;
-        font-size: 16px;
+      .btn {
+        padding: 10px 15px;
+        font-size: 14px;
         font-weight: bold;
         border-radius: 8px;
-        border: none;
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.9);
         box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        margin: 0 10px;
+        margin: 0 5px;
         cursor: pointer;
-        pointer-events: auto;
+        pointer-events: auto; /* 讓按鈕可被點擊 */
+        text-align: center;
         transition: background 0.2s;
       }
-      button:active {
+      .btn:active {
         background: rgba(200, 200, 200, 1);
       }
     </style>
 
     <script>
-      // 定義切換顯示平面圖片的函式
-      window.showImage = function() {
+      // 顯示平面名片函式，接收檔名參數
+      window.showImage = function(fileName, target) {
         const plane = document.querySelector('#display-plane');
         const model = document.querySelector('#display-model');
         
         // 隱藏 3D 模型
         if(model) model.setAttribute('visible', false);
         
-        // 顯示平面並重新觸發動畫
+        // 顯示平面並更新圖片路徑
         if(plane) {
+          if(fileName) plane.setAttribute('src', 'assets/' + fileName);
           plane.setAttribute('visible', true);
+          
+          // 觸發進場與漂浮動畫
           plane.emit('playScale');
-          // 加上微小延遲確保動畫系統順利銜接漂浮效果
           setTimeout(() => plane.emit('playFloat'), 100); 
         }
       };
 
-      // 定義切換顯示 3D 模型的函式
-      window.show3D = function() {
+      // 顯示 3D 模型函式，接收檔名參數
+      window.show3D = function(fileName, target) {
         const plane = document.querySelector('#display-plane');
         const model = document.querySelector('#display-model');
         
         // 隱藏平面圖片
         if(plane) plane.setAttribute('visible', false);
         
-        // 顯示 3D 模型並確保比例正確
+        // 顯示 3D 模型並設定比例為 0.3
         if(model) {
+          if(fileName) model.setAttribute('gltf-model', 'assets/' + fileName);
           model.setAttribute('visible', true);
-          model.setAttribute('scale', '0.5 0.5 0.5'); 
+          model.setAttribute('scale', '0.3 0.3 0.3'); 
         }
       };
 
@@ -74,8 +76,8 @@
       AFRAME.registerComponent('marker-handler', {
         init: function () {
           this.el.addEventListener('markerFound', () => {
-            // 掃描到 Marker 時，預設觸發顯示圖片與動畫
-            window.showImage();
+            // 預設載入 assets/my-card.jpg
+            window.showImage('my-card.jpg'); 
           });
         }
       });
@@ -83,9 +85,12 @@
   </head>
 
   <body style="margin: 0; overflow: hidden;">
-    <div class="buttons">
-      <button onclick="window.showImage()">顯示名片</button>
-      <button onclick="window.show3D()">顯示 3D</button>
+    
+    <div id="ui-container">
+      <div class="btn" onclick="showImage('my-card.jpg', '_blank')">🖼️ 平面名片</div>
+      <div class="btn" onclick="window.open('https://youtu.be/dA0uEJms7zM?si=7V0Ljdmd2wS5kTaK&t=1', '_blank')">🎥 影片介紹</div>
+      <div class="btn" onclick="window.open('https://tim6404.github.io/design-works/', '_blank')">🌐 個人網頁</div>
+      <div class="btn" onclick="show3D('robot.glb', '_blank')">🤖 3D 動態</div>
     </div>
 
     <a-scene 
@@ -109,12 +114,12 @@
                  height="1"
                  visible="false"
                  animation__scale="property: scale; from: 0 0 0; to: 1 1 1; dur: 1000; easing: easeOutElastic; startEvents: playScale"
-                 animation__float="property: position; from: 0 0.1 0; to: 0 0.3 0; dir: alternate; dur: 1000; loop: true; startEvents: playFloat">
+                 animation__float="property: position; from: 0 0.1 0; to: 0 0.8 0; dir: alternate; dur: 1000; loop: true; startEvents: playFloat">
         </a-plane>
 
         <a-entity id="display-model" 
                   gltf-model="#robot-model" 
-                  scale="0.5 0.5 0.5" 
+                  scale="0.3 0.3 0.3" 
                   position="0 0 0"
                   visible="false"
                   animation-mixer>
@@ -122,7 +127,7 @@
 
       </a-marker>
 
-      <a-light type="ambient" color="#ffffff" intensity="1.5"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="1.8"></a-light>
       <a-entity camera></a-entity>
       
     </a-scene>
