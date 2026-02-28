@@ -1,120 +1,119 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>威志的 AR 數位名片</title>
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/3.3.2/aframe/build/aframe-ar.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>
+<head>
+    <title>AR 數位名片互動版</title>
+    <meta charset="utf-8">
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
     
     <style>
-      #ui-container {
-        position: absolute;
-        top: 20px; right: 10px; z-index: 10;
-        display: flex; flex-direction: column; gap: 10px;
-      }
-      .btn {
-        background: rgba(0, 0, 0, 0.7);
-        color: white; border: 1px solid rgba(255,255,255,0.3);
-        padding: 12px; border-radius: 20px;
-        font-family: 'Microsoft JhengHei', sans-serif; text-align: center;
-        backdrop-filter: blur(5px);
-        cursor: pointer; transition: 0.3s;
-        user-select: none;
-      }
-      .btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.2); }
+        /* 將按鈕固定在畫面右側置中 */
+        .ui-container {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000; /* 確保按鈕在 3D 畫面最上層 */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            padding: 12px 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: 0.3s;
+        }
+
+        .action-btn:active {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #000000;
+        }
     </style>
+</head>
 
-    <script>
-      // 定義全域切換函式，供 UI 按鈕與 Marker 事件使用
-      window.showImage = function() {
-        const plane = document.querySelector('#display-plane');
-        const model = document.querySelector('#display-model');
-        if(model) model.setAttribute('visible', false);
-        if(plane) {
-          plane.setAttribute('visible', true);
-          plane.emit('playScale');
-          plane.emit('playFloat'), 100);
-        }
-      };
-
-      window.show3D = function() {
-        const plane = document.querySelector('#display-plane');
-        const model = document.querySelector('#display-model');
-        if(plane) plane.setAttribute('visible', false);
-        if(model) model.setAttribute('visible', true);
-          model.setAttribute('scale', '0.5 0.5 0.5');
-      };
-
-      // 註冊 marker-handler 元件
-      AFRAME.registerComponent('marker-handler', {
-        init: function () {
-          // 掃描到標記時：觸發平面名片進場
-          this.el.addEventListener('markerFound', () => {
-            window.showImage(); 
-          });
-
-          // 遺失標記時：隱藏所有物件
-          this.el.addEventListener('markerLost', () => {
-            const plane = document.querySelector('#display-plane');
-            const model = document.querySelector('#display-model');
-            if(plane) plane.setAttribute('visible', false);
-            if(model) model.setAttribute('visible', false);
-          });
-        }
-      });
-    </script>
-  </head>
-
-  <body style="margin: 0; overflow: hidden;">
+<body style="margin: 0; overflow: hidden;">
     
-    <div id="ui-container">
-      <div class="btn" onclick="showImage('my-card.jpg', '_blank')">🖼️ 平面名片</div>
-      <div class="btn" onclick="window.open('https://youtu.be/dA0uEJms7zM?si=7V0Ljdmd2wS5kTaK&t=1', '_blank')">🎥 影片介紹</div>
-      <div class="btn" onclick="window.open('https://tim6404.github.io/design-works/', '_blank')">🌐 個人網頁</div>
-      <div class="btn" onclick="show3D('robot.glb', '_blank')">🤖 3D 動態</div>
-      <div class="btn" onclick="window.open('https://github.com', '_blank')">🔗 原始碼</div>
+    <div class="ui-container">
+        <button class="action-btn" id="btn-card">漂浮名片</button>
+        <button class="action-btn" id="btn-3d">3D 模型</button>
     </div>
 
-    <a-scene 
-      arjs="sourceType: webcam; debugUIEnabled: false;"
-      renderer="logarithmicDepthBuffer: true;"
-      vr-mode-ui="enabled: false">
-      
-      <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
-      <a-light type="directional" color="#ffffff" intensity="0.8" position="1 2 1"></a-light>
+    <a-scene
+        vr-mode-ui="enabled: false;"
+        loading-screen="enabled: false;"
+        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+        id="scene"
+        embedded
+        gesture-detector
+        renderer="logarithmicDepthBuffer: true; precision: medium;"
+    >
+        <a-assets>
+            <img id="card-img" src="assets/my-card.jpg">
+            <a-asset-item id="robot-model" src="assets/robot.glb"></a-asset-item>
+        </a-assets>
 
-      <a-assets>
-        <img id="card-img" src="my-card.jpg">
-        <a-asset-item id="asset-model" src="robot.glb"></a-asset-item>
-      </a-assets>
+        <a-marker
+            id="animated-marker"
+            type="pattern"
+            preset="custom"
+            url="assets/pattern-qr.ioi.tw.patt"
+            raycaster="objects: .clickable"
+            emitevents="true"
+            cursor="fuse: false; rayOrigin: mouse;"
+        >
+            <a-image
+                id="my-card"
+                src="#card-img"
+                scale="1.5 1.5 1.5"
+                position="0 0.5 0"
+                rotation="-90 0 0"
+                class="clickable"
+                visible="true"
+                gesture-handler
+                animation="property: position; dir: alternate; dur: 2000; easing: easeInOutSine; loop: true; to: 0 0.8 0"
+            ></a-image>
 
-      <a-marker type="pattern" 
-          url="pattern-qr.ioi.tw.patt"
-          emitevents="true"
-          marker-handler
-          smooth="true"
-          smoothCount="10"
-          smoothTolerance="0.01"
-          smoothThreshold="5">
-               
-        <a-plane id="display-plane" 
-         src="#card-img" 
-         position="0 0 0" rotation="-90 0 0" width="1.5" height="1"
-         visible="false"
-         animation__scale="property: scale; from: 0 0 0; to: 1.5 1.5 1.5; dur: 1500; easing: easeOutElastic; startEvents: playScale"
-         animation__float="property: position; from: 0 0 0; to: 0 0.2 0; dir: alternate; dur: 1000; loop: true; startEvents: playFloat">
-        </a-plane>
-        
-        <a-entity id="display-model" 
-                  gltf-model="#asset-model" 
-                  scale="0.5 0.5 0.5" 
-                  visible="false"
-                  animation-mixer="clip: *; loop: repeat;">
-        </a-entity>
+            <a-entity
+                id="my-3d"
+                gltf-model="#robot-model"
+                scale="1 1 1"
+                position="0 0 0"
+                class="clickable"
+                visible="false"
+                gesture-handler
+            ></a-entity>
+        </a-marker>
 
-      </a-marker>
+        <a-entity camera></a-entity>
     </a-scene>
-  </body>
+
+    <script>
+        // 取得按鈕與 AR 物件
+        const btnCard = document.getElementById('btn-card');
+        const btn3d = document.getElementById('btn-3d');
+        const myCard = document.getElementById('my-card');
+        const my3d = document.getElementById('my-3d');
+
+        // 點擊「漂浮名片」按鈕
+        btnCard.addEventListener('click', () => {
+            myCard.setAttribute('visible', 'true');
+            my3d.setAttribute('visible', 'false');
+        });
+
+        // 點擊「3D 模型」按鈕
+        btn3d.addEventListener('click', () => {
+            myCard.setAttribute('visible', 'false');
+            my3d.setAttribute('visible', 'true');
+        });
+    </script>
+
+</body>
 </html>
