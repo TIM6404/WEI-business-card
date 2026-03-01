@@ -79,11 +79,11 @@
         if(plane) plane.setAttribute('visible', false);
         if(shadow) shadow.setAttribute('visible', false);
         
-        // 顯示 3D 模型並設定比例為 0.1
+        // 顯示 3D 模型並設定比例為 0.3
         if(model) {
           if(fileName) model.setAttribute('gltf-model', 'assets/' + fileName);
           model.setAttribute('visible', true);
-          model.setAttribute('scale', '0.3 0.3 0.3'); // ★ 已更新為 0.1
+          model.setAttribute('scale', '0.3 0.3 0.3'); 
         }
       };
 
@@ -123,7 +123,7 @@
         
         <a-plane id="display-plane" 
                  src="#card-img" 
-                 position="0 0.2 0" 
+                 position="0 0.1 0" 
                  rotation="-90 0 0" 
                  width="1.5" 
                  height="1"
