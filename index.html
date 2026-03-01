@@ -1,5 +1,6 @@
 <!DOCTYPE 
-<head>
+<html>
+  <head>
     <meta charset="utf-8" />
     <title>AR 數位名片</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -7,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
 
     <style>
-      /* UI 容器與按鈕樣式設定 */
+      /* 霧玻璃 UI 容器與按鈕樣式設定 */
       #ui-container {
         position: absolute;
         bottom: 20px;
@@ -16,59 +17,73 @@
         display: flex;
         justify-content: center;
         z-index: 10;
-        pointer-events: none; /* 讓容器本身不阻擋 AR 點擊 */
+        pointer-events: none;
       }
       .btn {
         padding: 10px 15px;
         font-size: 14px;
         font-weight: bold;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        border-radius: 12px;
         margin: 0 5px;
         cursor: pointer;
-        pointer-events: auto; /* 讓按鈕可被點擊 */
+        pointer-events: auto;
         text-align: center;
-        transition: background 0.2s;
+        transition: all 0.3s ease;
+        color: #333;
+        
+        /* 霧玻璃特效 */
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       }
       .btn:active {
-        background: rgba(200, 200, 200, 1);
+        background: rgba(255, 255, 255, 0.6);
+        transform: scale(0.95);
       }
     </style>
 
     <script>
-      // 顯示平面名片函式，接收檔名參數
+      // 顯示平面名片與光影函式
       window.showImage = function(fileName, target) {
         const plane = document.querySelector('#display-plane');
         const model = document.querySelector('#display-model');
+        const shadow = document.querySelector('#glow-shadow');
         
         // 隱藏 3D 模型
         if(model) model.setAttribute('visible', false);
         
-        // 顯示平面並更新圖片路徑
+        // 顯示平面與光影並更新圖片路徑
         if(plane) {
           if(fileName) plane.setAttribute('src', 'assets/' + fileName);
           plane.setAttribute('visible', true);
+          if(shadow) shadow.setAttribute('visible', true);
           
           // 觸發進場與漂浮動畫
           plane.emit('playScale');
-          setTimeout(() => plane.emit('playFloat'), 100); 
+          setTimeout(() => {
+            plane.emit('playFloat');
+            if(shadow) shadow.emit('playFloat'); 
+          }, 100); 
         }
       };
 
-      // 顯示 3D 模型函式，接收檔名參數
+      // 顯示 3D 模型函式
       window.show3D = function(fileName, target) {
         const plane = document.querySelector('#display-plane');
         const model = document.querySelector('#display-model');
+        const shadow = document.querySelector('#glow-shadow');
         
-        // 隱藏平面圖片
+        // 隱藏平面圖片與專屬光影
         if(plane) plane.setAttribute('visible', false);
+        if(shadow) shadow.setAttribute('visible', false);
         
-        // 顯示 3D 模型並設定比例為 0.3
+        // 顯示 3D 模型並設定比例為 0.1
         if(model) {
           if(fileName) model.setAttribute('gltf-model', 'assets/' + fileName);
           model.setAttribute('visible', true);
-          model.setAttribute('scale', '0.3 0.3 0.3'); 
+          model.setAttribute('scale', '0.1 0.1 0.1'); // ★ 已更新為 0.1
         }
       };
 
@@ -114,12 +129,22 @@
                  height="1"
                  visible="false"
                  animation__scale="property: scale; from: 0 0 0; to: 1 1 1; dur: 1000; easing: easeOutElastic; startEvents: playScale"
-                 animation__float="property: position; from: 0 0.1 0; to: 0 0.8 0; dir: alternate; dur: 1000; loop: true; startEvents: playFloat">
+                 animation__float="property: position; from: 0 0.1 0; to: 0 0.3 0; dir: alternate; dur: 1000; loop: true; startEvents: playFloat">
+        </a-plane>
+
+        <a-plane id="glow-shadow"
+                 width="1.5" height="1"
+                 rotation="-90 0 0" 
+                 position="0 0.01 0" 
+                 material="color: #0088ff; transparent: true; opacity: 0.8; shader: flat;"
+                 visible="false"
+                 animation__scale="property: scale; from: 1 1 1; to: 0.6 0.6 0.6; dir: alternate; dur: 1000; loop: true; startEvents: playFloat"
+                 animation__opacity="property: opacity; from: 0.8; to: 0.2; dir: alternate; dur: 1000; loop: true; startEvents: playFloat">
         </a-plane>
 
         <a-entity id="display-model" 
                   gltf-model="#robot-model" 
-                  scale="0.3 0.3 0.3" 
+                  scale="0.1 0.1 0.1" 
                   position="0 0 0"
                   visible="false"
                   animation-mixer>
@@ -127,7 +152,7 @@
 
       </a-marker>
 
-      <a-light type="ambient" color="#ffffff" intensity="1.8"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="1.5"></a-light>
       <a-entity camera></a-entity>
       
     </a-scene>
