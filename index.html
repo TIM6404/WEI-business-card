@@ -83,7 +83,7 @@
         if(model) {
           if(fileName) model.setAttribute('gltf-model', 'assets/' + fileName);
           model.setAttribute('visible', true);
-          model.setAttribute('scale', '0.1 0.1 0.1'); // ★ 已更新為 0.1
+          model.setAttribute('scale', '0.3 0.3 0.3'); // ★ 已更新為 0.1
         }
       };
 
@@ -123,7 +123,7 @@
         
         <a-plane id="display-plane" 
                  src="#card-img" 
-                 position="0 0.1 0" 
+                 position="0 0.2 0" 
                  rotation="-90 0 0" 
                  width="1.5" 
                  height="1"
@@ -144,7 +144,7 @@
 
         <a-entity id="display-model" 
                   gltf-model="#robot-model" 
-                  scale="0.1 0.1 0.1" 
+                  scale="0.3 0.3 0.3" 
                   position="0 0 0"
                   visible="false"
                   animation-mixer>
