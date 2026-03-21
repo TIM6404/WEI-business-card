@@ -45,6 +45,35 @@
     </style>
 
     <script>
+      // ==========================================
+      // 【GAS 後台追蹤引擎】
+      // ==========================================
+      function trackInteraction(actionName) {
+        // 設定你的專屬名片 ID
+        const currentCardId = 'Weichih02'; 
+        
+        // ⚠️ 請替換為你部署 Apps Script 取得的 API 網址
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzDL4JaeiVHjYBOJeMMkZPuP_3BJudwYBTQ4l15BSDaj25kt6n0ZR4GeExxRlc_gfNFKw/exec'; 
+        
+        const requestUrl = scriptUrl + '?cardId=' + encodeURIComponent(currentCardId) + '&action=' + encodeURIComponent(actionName);
+        
+        fetch(requestUrl, { mode: 'no-cors' })
+          .catch(error => console.log("數據紀錄連線異常"));
+      }
+
+      // ==========================================
+      // 【音效播放函式】
+      // ==========================================
+      function playClickSound() {
+        const sound = document.querySelector('#click-sound-asset');
+        if (sound) {
+          // 重設播放時間到開頭，防止連續快速點擊時音效不完整
+          sound.currentTime = 0; 
+          // 播放音效 (瀏覽器政策要求需由使用者互動觸發)
+          sound.play().catch(e => console.log("Audio play failed:", e));
+        }
+      }
+
       // 顯示平面名片與光影函式
       window.showImage = function(fileName, target) {
         const plane = document.querySelector('#display-plane');
@@ -79,11 +108,11 @@
         if(plane) plane.setAttribute('visible', false);
         if(shadow) shadow.setAttribute('visible', false);
         
-        // 顯示 3D 模型並設定比例為 0.3
+        // 【修正】：顯示 3D 模型並將比例精準放大為 0.8
         if(model) {
           if(fileName) model.setAttribute('gltf-model', 'assets/' + fileName);
           model.setAttribute('visible', true);
-          model.setAttribute('scale', '0.3 0.3 0.3'); 
+          model.setAttribute('scale', '0.8 0.8 0.8'); 
         }
       };
 
@@ -91,6 +120,9 @@
       AFRAME.registerComponent('marker-handler', {
         init: function () {
           this.el.addEventListener('markerFound', () => {
+            // 掃描成功時發送追蹤訊號
+            trackInteraction('掃描_觸發名片');
+            
             // 預設載入 assets/my-card.jpg
             window.showImage('my-card.jpg'); 
           });
@@ -102,10 +134,10 @@
   <body style="margin: 0; overflow: hidden;">
     
     <div id="ui-container">
-      <div class="btn" onclick="showImage('my-card.jpg', '_blank')">🖼️ 平面名片</div>
-      <div class="btn" onclick="window.open('https://youtu.be/s9_33EVIjTE?si=YCNQ-JKQBZ8v78p9', '_blank')">🎥 影片介紹</div>
-      <div class="btn" onclick="window.open('https://tim6404.github.io/design-works/', '_blank')">🌐 個人網頁</div>
-      <div class="btn" onclick="show3D('robot.glb', '_blank')">🤖 3D 動態</div>
+      <div class="btn" onclick="playClickSound(); trackInteraction('點擊_平面名片'); showImage('my-card.jpg', '_blank')">🖼️ 平面名片</div>
+      <div class="btn" onclick="playClickSound(); trackInteraction('點擊_影片介紹'); window.open('https://youtu.be/dA0uEJms7zM?si=7V0Ljdmd2wS5kTaK&t=1', '_blank')">🎥 影片介紹</div>
+      <div class="btn" onclick="playClickSound(); trackInteraction('點擊_個人網頁'); window.open('https://tim6404.github.io/design-works/', '_blank')">🌐 個人網頁</div>
+      <div class="btn" onclick="playClickSound(); trackInteraction('點擊_3D動態'); show3D('robot.glb', '_blank')">🤖 3D 動態</div>
     </div>
 
     <a-scene 
@@ -115,6 +147,8 @@
       vr-mode-ui="enabled: false">
       
       <a-assets>
+        <audio id="click-sound-asset" src="assets/da20260321.mp3" preload="auto"></audio>
+        
         <img id="card-img" src="assets/my-card.jpg">
         <a-asset-item id="robot-model" src="assets/robot.glb"></a-asset-item>
       </a-assets>
@@ -144,7 +178,7 @@
 
         <a-entity id="display-model" 
                   gltf-model="#robot-model" 
-                  scale="0.3 0.3 0.3" 
+                  scale="0.8 0.8 0.8" 
                   position="0 0 0"
                   visible="false"
                   animation-mixer>
@@ -157,6 +191,5 @@
       
     </a-scene>
   </body>
-
 </html>
-
+第三步：內部事實查核程序
